@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 
 export const Select = <T extends { [key in K]: string }, K extends keyof T>({
@@ -25,8 +25,26 @@ export const Select = <T extends { [key in K]: string }, K extends keyof T>({
     );
   };
 
+  const ref = useRef<null | HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        ref.current &&
+        event.target instanceof Element &&
+        !ref.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside, true);
+    return () =>
+      document.removeEventListener("click", handleClickOutside, true);
+  }, []);
+
   return (
-    <div>
+    <div ref={ref}>
       <div
         className="flex h-12 w-fit min-w-80 cursor-pointer items-center justify-between rounded-md border border-green-400 p-2 text-lg"
         onClick={() => setIsOpen((e) => !e)}

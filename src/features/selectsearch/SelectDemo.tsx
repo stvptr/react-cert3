@@ -37,7 +37,7 @@ export const DemoSelectSearchFeature = () => {
     <div>
       <h1 className="mb-8 text-xl">Demo select feature</h1>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col gap-8 mx-auto w-fit">
         <Select
           valueChange={(e) => console.log(e)}
           options={data}
