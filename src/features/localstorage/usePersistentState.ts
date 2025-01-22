@@ -1,9 +1,9 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-let listeners: (() => void)[] = [];
+const listeners: { [key in string]?: (() => void)[] } = {};
 
-const notifyListeners = () => {
-  for (const listener of listeners) {
+const notifyListeners = (key: string) => {
+  for (const listener of listeners[key] || []) {
     listener();
   }
 };
@@ -18,23 +18,33 @@ const store = {
   },
   set: (key: string, value: unknown) => {
     localStorage.setItem(key, JSON.stringify(value));
-    notifyListeners();
+    notifyListeners(key);
   },
-  subscribe(listener: () => void) {
-    listeners = [...listeners, listener];
+  subscribe: (key: string) => (listener: () => void) => {
+    listeners[key] = [...(listeners[key] || []), listener];
     return () => {
-      listeners = listeners.filter((l) => l !== listener);
+      const newListeners = listeners[key]
+        ? listeners[key].filter((l) => l !== listener)
+        : undefined;
+      if (!newListeners || newListeners.length === 0) {
+        delete listeners[key];
+      } else {
+        listeners[key] = newListeners;
+      }
     };
   },
 };
 
 export const usePersistentState = (key: string) => {
-  const value = useSyncExternalStore(store.subscribe, () => store.get(key));
+  const value = useSyncExternalStore(
+    useCallback(store.subscribe(key), [store.subscribe, key]),
+    () => store.get(key),
+  );
 
   useEffect(() => {
-    const interval = setInterval(notifyListeners, 5000);
+    const interval = setInterval(() => notifyListeners(key), 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [key]);
 
   return { value, setValue: store.set.bind(undefined, key) };
 };
