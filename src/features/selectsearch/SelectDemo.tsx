@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { Select } from "./Select.tsx";
 
+const namesData = [
+  { label: "Hello" },
+  { label: "Bonjour" },
+  { label: "Hola" },
+  { label: "Hallo" },
+  { label: "Buongiorno" },
+  { label: "Dzień dobry" },
+];
+
 type UserApiResponse = {
   id: number;
   name: string;
@@ -28,11 +37,19 @@ export const DemoSelectSearchFeature = () => {
     <div>
       <h1 className="mb-8 text-xl">Demo select feature</h1>
 
-      <Select
-        valueChange={(e) => console.log(e)}
-        options={data}
-        labelKey={"name"}
-      />
+      <div className="flex flex-wrap gap-4">
+        <Select
+          valueChange={(e) => console.log(e)}
+          options={data}
+          labelKey={"name"}
+        />
+        <Select
+          valueChange={(e) => console.log(e)}
+          options={namesData}
+          labelKey={"label"}
+        />
+      </div>
+      {/*<div className="mb-8 h-20 bg-blue-400"></div>*/}
     </div>
   );
 };
