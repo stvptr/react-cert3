@@ -6,11 +6,11 @@ export const Select = <T extends { [key in K]: string }, K extends keyof T>({
   options,
   valueChange,
 }: {
-  valueChange: (newValue: T) => void;
+  valueChange: (newValue: T | undefined) => void;
   options: T[];
   labelKey: K;
 }) => {
-  const [selected, setSelected] = useState<T | null>(null);
+  const [selected, setSelected] = useState<T | undefined>(undefined);
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -43,6 +43,8 @@ export const Select = <T extends { [key in K]: string }, K extends keyof T>({
       document.removeEventListener("click", handleClickOutside, true);
   }, []);
 
+  const lowerCaseSearch = search.toLowerCase();
+
   return (
     <div ref={ref}>
       <div
@@ -52,26 +54,27 @@ export const Select = <T extends { [key in K]: string }, K extends keyof T>({
         <span>{selected?.[labelKey]}</span>
         <X
           onClick={(e) => {
-            setSelected(null);
+            setSelected(undefined);
+            valueChange(undefined);
             e.stopPropagation();
           }}
         />
       </div>
       {isOpen && (
-        <div className="absolute mt-1 w-fit rounded-md border border-gray-300 bg-gray-50 p-2 z-20">
+        <div className="absolute z-20 mt-1 w-fit rounded-md border border-gray-300 bg-gray-50 p-2">
           <div className="mb-2 flex items-center gap-2">
             <Search />
             <input
               value={search}
               className="rounded-md border border-gray-300 p-1 px-2"
               type="text"
-              onChange={(e) => setSearch(e.target.value.toLowerCase())}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <ul>
             {options
               .filter((option) =>
-                option[labelKey].toLowerCase().includes(search),
+                option[labelKey].toLowerCase().includes(lowerCaseSearch),
               )
               .map((option) => (
                 <li
