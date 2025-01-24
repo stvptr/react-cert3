@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore, useCallback } from "react";
 
 let listeners: (() => void)[] = [];
 
@@ -29,7 +29,7 @@ const store = {
 };
 
 export const usePersistentState = (key: string) => {
-  const value = useSyncExternalStore(store.subscribe, () => store.get(key));
+  const value = useSyncExternalStore(store.subscribe, useCallback(() => store.get(key), [key]));
 
   useEffect(() => {
     const interval = setInterval(notifyListeners, 5000);
